@@ -2,6 +2,12 @@ import mysql from "mysql2/promise"
 import express from 'express'
 import cors from 'cors'
 
+import DBCfg from "./src/config/db.js"
+
+import authRoutes from "./src/routes/Auth.js"
+import chamadosRoutes from "./src/routes/Chamados.js"
+import inventarioRoutes from "./src/routes/Inventario.js"
+
 const app = express()
 const PORT = 4000
 
@@ -11,198 +17,43 @@ const corsOptions ={
     optionSuccessStatus:200,
 }
 
-const connection = await mysql.createConnection({
-    host: "localhost",
-    port: 3306,
-    user: "internet",
-    password: "!@#ASD123asd",
-    database: "techstockapp"
-})
+const connection = await mysql.createConnection(DBCfg)
 
 app.use(express.json())
 app.use(cors(corsOptions))
+
+app.use("/user", authRoutes)
+app.use("/chamados", chamadosRoutes)
+app.use("/inventario", inventarioRoutes)
 
 app.get('/', (req, res) => {
     res.send("Starter")
 })
 
-app.get('/chamados/list', async (req, res) => {
-    try {
-        const [rows, fields] = await connection.execute(
-            `SELECT * FROM chamados WHERE status <> 'Solucionado'` 
-        )
-        
-        console.log(rows)
-        
-        res.status(202).json({
-            success: true,
-            content: rows
-        })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            success: true,
-            message: error,
-        });
-    }
-})
-
-app.get('/chamados/search/:id', async (req, res) => {
-    try {
-        const [rows, fields] = await connection.execute(
-            `SELECT * FROM chamados WHERE id = ${req.params.id}` 
-        )
-        
-        console.log(rows)
-        
-        res.status(202).json({
-            success: true,
-            content: rows
-        })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            success: true,
-            message: error,
-        });
-    }
-})
-
-app.post('/chamados/add', async (req, res) => {
-    const data = req.body
-    try {
-        const [rows, fields] = await connection.execute(
-            `INSERT INTO chamados
-            (patrimonio, descricao, responsavel, setor, created_at, created_by) 
-            VALUES 
-            (${data['patrimonio']}, '${data['descricao']}', '${data['responsavel']}', '${data['setor']}', 
-            current_timestamp(), 'SEM NOME')`
-        )
-        res.status(202).json({
-            success: true,
-            message: "Registro criado"
-        })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
-})
-
-app.put('/chamados/update', async (req, res) => {
-    const data = req.body
-
-    try{
-        const [rows, fields] = await connection.execute(
-            `UPDATE chamados 
-            SET 
-                responsavel = '${data["responsavel"]}',
-                setor = '${data["setor"]}',
-                tecnico = '${data["tecnico"]}',
-                tags = '${data["tags"]}',
-                status = '${data["status"]}',
-                linksBase = NULL,
-                edited_at = current_timestamp(),
-                edited_by = 'SEM NOME AINDA'
-            WHERE 
-                chamados.id = ${data["id"]}`
-        )
-
-        res.status(202).json({
-            success: true,
-            message: "Usuário logado"
-        })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
-})
-
-app.put('/chamados/msgUpdate', async (req, res) => {
-    const data = req.body
+// app.post('/user/verify', async (req, res) => {
+//     const data = req.body
     
-    try{
-        const [rows, fields] = await connection.execute(
-            `SELECT mensagens FROM chamados WHERE id = ${data["id"]}` 
-        )
-        let temp = JSON.parse(rows[0]["mensagens"])
-        temp.push(data.mensagem)
-            // console.log JSON.parse(
-        await connection.execute(
-            `UPDATE chamados 
-            SET 
-                mensagens = '${JSON.stringify(temp)}'
-            WHERE 
-                chamados.id = ${data["id"]}`
-        )
-
-        const [rowsUP, fieldsUP] = await connection.execute(
-            `SELECT mensagens FROM chamados WHERE id = ${data["id"]}` 
-        )
-
-        res.status(202).json({
-            success: true,
-            msgData: rowsUP,
-            message: "Usuário logado"
-        })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
-})
-
-app.delete('/chamados/delete/:id', async (req, res) => {
-    try{
-        const [rows, fields] = await connection.execute(
-            `DELETE FROM chamados WHERE chamados.id = ${req.params.id}`
-        )
+//     try {
+//         const [rows, fields] = await connection.execute(
+//             `SELECT * FROM users WHERE user = '${data["user"]}' LIMIT 1` 
+//         )
+//         const passwordBD = rows[0]['password']
+//         const passwordLogin = data.password
         
-        res.status(202).json({
-            success: true,
-            message: "Chamado removido com sucesso"
-        })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
-})
-
-app.post('/user/verify', async (req, res) => {
-    const data = req.body
-    
-    try {
-        const [rows, fields] = await connection.execute(
-            `SELECT * FROM users WHERE user = '${data["user"]}' LIMIT 1` 
-        )
-        const passwordBD = rows[0]['password']
-        const passwordLogin = data.password
-        
-        if (passwordBD == passwordLogin) {
-            res.status(202).json({
-                success: true,
-                message: "Usuário logado"
-            })
-        }
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
-})
-
+//         if (passwordBD == passwordLogin) {
+//             res.status(202).json({
+//                 success: true,
+//                 message: "Usuário logado"
+//             })
+//         }
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).json({
+//             success: false,
+//             message: error,
+//         });
+//     }
+// })
 
 app.listen(PORT, () => { 
     console.log(`Server listening in http://localhost:${PORT}`)

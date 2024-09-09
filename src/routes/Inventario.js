@@ -9,13 +9,15 @@ import {
     deleteOne
 }  from "../controllers/InventarioController.js"
 
+import { authMiddleware } from '../middleware/AuthMiddleware.js'
+
 const inventarioRoutes = Router()
 
-inventarioRoutes.get('/list', list)
-inventarioRoutes.get('/search/:id', search)
-inventarioRoutes.get('/chamados/:patrimonio', getChamados)
-inventarioRoutes.get('/add', add)
-inventarioRoutes.get('/update', update)
-inventarioRoutes.get('/delete/:id', deleteOne)
+inventarioRoutes.get('/list', authMiddleware, list)
+inventarioRoutes.get('/search/:id', authMiddleware, search)
+inventarioRoutes.get('/chamados/:patrimonio', authMiddleware, getChamados)
+inventarioRoutes.get('/add', authMiddleware, add)
+inventarioRoutes.get('/update', authMiddleware, update)
+inventarioRoutes.get('/delete/:id', authMiddleware, deleteOne)
 
 export default inventarioRoutes

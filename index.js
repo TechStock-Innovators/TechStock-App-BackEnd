@@ -8,6 +8,8 @@ import authRoutes from "./src/routes/Auth.js"
 import chamadosRoutes from "./src/routes/Chamados.js"
 import inventarioRoutes from "./src/routes/Inventario.js"
 
+import { authMiddleware } from './src/middleware/AuthMiddleware.js'
+
 const app = express()
 const PORT = 4000
 
@@ -23,7 +25,7 @@ app.use(express.json())
 app.use(cors(corsOptions))
 
 app.use("/user", authRoutes)
-app.use("/chamados", chamadosRoutes)
+app.use("/chamados", authMiddleware, chamadosRoutes)
 app.use("/inventario", inventarioRoutes)
 
 app.get('/', (req, res) => {

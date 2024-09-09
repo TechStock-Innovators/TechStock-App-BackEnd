@@ -1,6 +1,6 @@
 import mysql from "mysql2/promise"
 import jwt from "jsonwebtoken"
-import { hash, compare } from "bcryptjs"
+import bcrypt from "bcryptjs"
 
 import DBCfg from "../config/db.js"
 
@@ -10,6 +10,8 @@ export const register = async (req, res) => {
     const data = req.body
     
     try {
+        const password = await bcrypt.hash(data.password, 10)
+
         const [rows, fields] = await connection.execute(
             `INSERT INTO (
                 user,
@@ -20,7 +22,7 @@ export const register = async (req, res) => {
                 section,
             ) VALUES (
                 ${data.user},
-                ${data.password},
+                ${password},
                 ${data.name},
                 ${data.email},
                 ${data.permission},
@@ -32,7 +34,7 @@ export const register = async (req, res) => {
         if (passwordBD == passwordLogin) {
             res.status(202).json({
                 success: true,
-                message: "Usuário logado"
+                message: "Usuário registrado"
             })
         }
     } catch (error) {
@@ -44,17 +46,22 @@ export const register = async (req, res) => {
     }
 }
 
+export const novaSenha = async (req, res) => {
+    const data = req.body
+
+
+}
+
 export const verify = async (req, res) => {
     const data = req.body
-    
     try {
         const [rows, fields] = await connection.execute(
             `SELECT * FROM users WHERE user = '${data["user"]}' LIMIT 1` 
         )
         const passwordBD = rows[0]['password']
         const passwordLogin = data.password
-        
-        const isPasswordValid = await compare(passwordBD, passwordLogin)
+
+        const isPasswordValid = await bcrypt.compare(passwordLogin, passwordBD)
         if (!isPasswordValid) {
             return res.status(400).json({
                 success: false,
@@ -62,7 +69,7 @@ export const verify = async (req, res) => {
             });
         }
 
-        const token = jwt.sign({})
+        const token = jwt.sign({name: rows[0]["name"]}, 'bananadoce', { expiresIn: '1h' })
         return res.status(200).json({
             success: true,
             message: "Usuário logado",

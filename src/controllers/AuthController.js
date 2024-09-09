@@ -69,10 +69,12 @@ export const verify = async (req, res) => {
             });
         }
 
-        const token = jwt.sign({name: rows[0]["name"]}, 'bananadoce', { expiresIn: '1h' })
+        const token = jwt.sign({name: rows[0]["name"], permissao: rows[0]["permission"],}, 'bananadoce', { expiresIn: '1h' })
         return res.status(200).json({
             success: true,
             message: "Usuário logado",
+            nome: rows[0]["name"],
+            permissao: rows[0]["permission"],
             token
         })
 

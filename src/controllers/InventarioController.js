@@ -10,14 +10,11 @@ export const list = async (req, res) => {
             `SELECT * FROM inventario` 
         )
         
-        console.log(rows)
-        
         res.status(202).json({
             success: true,
             content: rows
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             success: true,
             message: error,
@@ -31,14 +28,11 @@ export const search = async (req, res) => {
             `SELECT * FROM inventario WHERE id = ${req.params.id}` 
         )
         
-        console.log(rows)
-        
         res.status(202).json({
             success: true,
             content: rows
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             success: true,
             message: error,
@@ -52,14 +46,11 @@ export const getChamados = async (req, res) => {
             `SELECT id, descricao, created_at FROM chamados WHERE patrimonio = ${req.params.patrimonio}` 
         )
         
-        console.log(rows)
-        
         res.status(202).json({
             success: true,
             content: rows
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             success: true,
             message: error,
@@ -82,7 +73,6 @@ export const add = async (req, res) => {
             message: "Registro criado"
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             success: false,
             message: error,
@@ -95,18 +85,23 @@ export const update = async (req, res) => {
 
     try{
         const [rows, fields] = await connection.execute(
-            `UPDATE chamados 
+            `UPDATE inventario 
             SET 
-                responsavel = '${data["responsavel"]}',
-                setor = '${data["setor"]}',
-                tecnico = '${data["tecnico"]}',
-                tags = '${data["tags"]}',
-                status = '${data["status"]}',
-                linksBase = NULL,
-                edited_at = current_timestamp(),
-                edited_by = 'SEM NOME AINDA'
+                nome = '${data["nome"]}'
+                ,patrimonio = ${data["patrimonio"]}
+                ,modelo = '${data["modelo"]}'
+                ,processador = '${data["processador"]}'
+                ,placamae = '${data["placamae"]}'
+                ,fonte = '${data["fonte"]}'
+                ,armazenamento = '${data["armazenamento"]}'
+                ,ram = '${data["ram"]}'
+                ,placadevideo = '${data["placadevideo"]}'
+                ,sistemaoperacional = '${data["sistemaoperacional"]}'
+                ,tipo = '${data["tipo"]}'
+                ,responsavel = '${data["responsavel"]}'
+                ,observacoes = '${data["observacoes"]}'
             WHERE 
-                chamados.id = ${data["id"]}`
+                id = ${data["id"]}`
         )
 
         res.status(202).json({
@@ -114,7 +109,6 @@ export const update = async (req, res) => {
             message: "Usuário logado"
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             success: false,
             message: error,
@@ -133,7 +127,6 @@ export const deleteOne = async (req, res) => {
             message: "Chamado removido com sucesso"
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             success: false,
             message: error,

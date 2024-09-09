@@ -11,15 +11,10 @@ import {
 const chamadosRoutes = Router()
 
 chamadosRoutes.get('/list', list)
-
 chamadosRoutes.get('/search/:id', search)
-
 chamadosRoutes.post('/add', add)
-
 chamadosRoutes.put('/update', update)
-
 chamadosRoutes.put('/msgUpdate', msgUpdate)
-
 chamadosRoutes.delete('/delete/:id', deleteOne)
 
 export default chamadosRoutes

@@ -16,8 +16,8 @@ const inventarioRoutes = Router()
 inventarioRoutes.get('/list', authMiddleware, list)
 inventarioRoutes.get('/search/:id', authMiddleware, search)
 inventarioRoutes.get('/chamados/:patrimonio', authMiddleware, getChamados)
-inventarioRoutes.get('/add', authMiddleware, add)
-inventarioRoutes.get('/update', authMiddleware, update)
-inventarioRoutes.get('/delete/:id', authMiddleware, deleteOne)
+inventarioRoutes.post('/add', authMiddleware, add)
+inventarioRoutes.put('/update', authMiddleware, update)
+inventarioRoutes.delete('/delete/:id', authMiddleware, deleteOne)
 
 export default inventarioRoutes

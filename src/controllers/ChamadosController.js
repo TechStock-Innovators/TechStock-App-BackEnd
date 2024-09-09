@@ -10,13 +10,11 @@ export const list = async (req, res) => {
             `SELECT * FROM chamados WHERE status <> 'Solucionado'` 
         )
         
-        
         res.status(202).json({
             success: true,
             content: rows
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             success: true,
             message: error,
@@ -30,14 +28,11 @@ export const search = async (req, res) => {
             `SELECT * FROM chamados WHERE id = ${req.params.id}` 
         )
         
-        console.log(rows)
-        
         res.status(202).json({
             success: true,
             content: rows
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             success: true,
             message: error,
@@ -60,7 +55,6 @@ export const add = async (req, res) => {
             message: "Registro criado"
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             success: false,
             message: error,
@@ -92,7 +86,6 @@ export const update = async (req, res) => {
             message: "Usuário logado"
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             success: false,
             message: error,
@@ -128,7 +121,6 @@ export const msgUpdate = async (req, res) => {
             message: "Usuário logado"
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             success: false,
             message: error,
@@ -147,7 +139,6 @@ export const deleteOne = async (req, res) => {
             message: "Chamado removido com sucesso"
         })
     } catch (error) {
-        console.log(error)
         res.status(500).json({
             success: false,
             message: error,

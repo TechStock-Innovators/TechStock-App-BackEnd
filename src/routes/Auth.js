@@ -7,7 +7,8 @@ import {
     update,
     list,
     search,
-    deleteOne
+    deleteOne,
+    getTecnicos
 } from "../controllers/AuthController.js"
 
 const authRoutes = Router()
@@ -20,5 +21,6 @@ authRoutes.post("/register", register)
 authRoutes.put("/novaSenha", novaSenha)
 authRoutes.put("/update/:id", update)
 authRoutes.delete("/delete/:id", deleteOne)
+authRoutes.get("/tecnicos", getTecnicos)
 
 export default authRoutes

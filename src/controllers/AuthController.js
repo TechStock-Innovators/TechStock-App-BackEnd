@@ -172,3 +172,21 @@ export const deleteOne = async (req, res) => {
         });
     }
 }
+
+export const getTecnicos = async (req, res) => {
+
+    try {
+        const [rows, fields] = await connection.execute(
+            `SELECT name FROM users WHERE permission = 'Técnico'`
+        )
+        res.status(202).json({
+            success: true,
+            content: rows
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: true,
+            message: error,
+        });
+    }
+}

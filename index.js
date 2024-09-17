@@ -7,6 +7,7 @@ import DBCfg from "./src/config/db.js"
 import authRoutes from "./src/routes/Auth.js"
 import chamadosRoutes from "./src/routes/Chamados.js"
 import inventarioRoutes from "./src/routes/Inventario.js"
+import dashboardRoutes from "./src/routes/Dashboard.js"
 
 import { authMiddleware } from './src/middleware/AuthMiddleware.js'
 
@@ -27,6 +28,7 @@ app.use(cors(corsOptions))
 app.use("/user", authRoutes)
 app.use("/chamados", authMiddleware, chamadosRoutes)
 app.use("/inventario", inventarioRoutes)
+app.use("/dashboard", dashboardRoutes)
 
 app.get('/', (req, res) => {
     res.send("Starter")

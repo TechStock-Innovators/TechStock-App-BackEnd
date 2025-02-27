@@ -1,73 +1,108 @@
-import mysql from "mysql2/promise"
+// import DBCfg from "../config/db.js"
 
-import DBCfg from "../config/db.js"
+// const connection = await mysql.createConnection(DBCfg)
 
-const connection = await mysql.createConnection(DBCfg)
+import pool from "../api/DatabaseConnector.js"
 
 export const list = async (req, res) => {
-    try {
-        const [rows, fields] = await connection.execute(
-            `SELECT * FROM chamados WHERE status <> 'Solucionado'` 
-        )
-        
-        res.status(202).json({
-            success: true,
-            content: rows
+    pool.getConnection((err, connection)=> {
+        if (err) {
+            res.status(500).json({
+                success: true,
+                message: err,
+            });
+        }
+
+        connection.query(`SELECT * FROM chamados WHERE status <> 'Solucionado'`, (err, result) => {
+            connection.release();
+            
+            if (err) {
+                res.status(500).json({
+                    success: true,
+                    message: err,
+                });
+            }
+
+            res.status(202).json({
+                success: true,
+                content: result
+            })
         })
-    } catch (error) {
-        res.status(500).json({
-            success: true,
-            message: error,
-        });
-    }
+    })
 }
 
 export const search = async (req, res) => {
-    try {
-        const [rows, fields] = await connection.execute(
-            `SELECT * FROM chamados WHERE id = ${req.params.id}` 
-        )
-        
-        res.status(202).json({
-            success: true,
-            content: rows
+    pool.getConnection((err, connection) => {
+        if(err) {
+            res.status(500).json({
+                success: true,
+                message: err,
+            });
+        }
+
+        connection.query( `SELECT * FROM chamados WHERE id = ${req.params.id}`, (err, result) => {
+            connection.release();
+
+            if (err) {
+                res.status(500).json({
+                    success: true,
+                    message: err,
+                });
+            }
+
+            res.status(202).json({
+                success: true,
+                content: result
+            })
         })
-    } catch (error) {
-        res.status(500).json({
-            success: true,
-            message: error,
-        });
-    }
+    })
 }
 
 export const add = async (req, res) => {
     const data = req.body
-    try {
-        const [rows, fields] = await connection.execute(
-            `INSERT INTO chamados
+    
+    pool.getConnection((err, connection) => {
+        if(err) {
+            res.status(500).json({
+                success: false,
+                message: err
+            })
+        }
+
+        connection.query(`INSERT INTO chamados
             (patrimonio, descricao, responsavel, setor, created_at, created_by) 
             VALUES 
             (${data['patrimonio']}, '${data['descricao']}', '${data['responsavel']}', '${data['setor']}', 
-            current_timestamp(), 'SEM NOME')`
-        )
-        res.status(202).json({
-            success: true,
-            message: "Registro criado"
-        })
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
+            current_timestamp(), 'SEM NOME')`, (err, result) => {
+                connection.release();
+                if (err) {
+                    res.status(500).json({
+                        success: false,
+                        message: err
+                    })
+                    return;
+                }
+
+                res.status(202).json({
+                    success: true,
+                    content: result
+                })
+            })
+    })
 }
 
 export const update = async (req, res) => {
     const data = req.body
 
-    try{
-        const [rows, fields] = await connection.execute(
-            `UPDATE chamados 
+    pool.getConnection((err, connection) => {
+        if(err) {
+            res.status(500).json({
+                success: false,
+                message: err
+            })
+        }
+
+        connection.query(`UPDATE chamados 
             SET 
                 responsavel = '${data["responsavel"]}',
                 setor = '${data["setor"]}',
@@ -78,70 +113,82 @@ export const update = async (req, res) => {
                 edited_at = current_timestamp(),
                 edited_by = 'SEM NOME AINDA'
             WHERE 
-                chamados.id = ${data["id"]}`
-        )
+                chamados.id = ${data["id"]}`, 
+                (err, result) => {
+                connection.release();
+                if (err) {
+                    res.status(500).json({
+                        success: false,
+                        message: err
+                    })
+                    return;
+                }
 
-        res.status(202).json({
-            success: true,
-            message: "Usuário logado"
-        })
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
+                res.status(202).json({
+                    success: true,
+                    content: result
+                })
+            })
+    })
 }
 
 export const msgUpdate = async (req, res) => {
     const data = req.body
     
-    try{
-        const [rows, fields] = await connection.execute(
-            `SELECT mensagens FROM chamados WHERE id = ${data["id"]}` 
-        )
-        let temp = JSON.parse(rows[0]["mensagens"])
-        temp.push(data.mensagem)
-            // console.log JSON.parse(
-        await connection.execute(
-            `UPDATE chamados 
+    pool.getConnection((err, connection) => {
+        if(err) {
+            res.status(500).json({
+                success: false,
+                message: err
+            })
+        }
+
+        connection.query(`UPDATE chamados 
             SET 
                 mensagens = '${JSON.stringify(temp)}'
             WHERE 
-                chamados.id = ${data["id"]}`
-        )
+                chamados.id = ${data["id"]}` , (err, result) => { // `SELECT mensagens FROM chamados WHERE id = ${data["id"]}`
+                connection.release();
+                if (err) {
+                    res.status(500).json({
+                        success: false,
+                        message: err
+                    })
+                    return;
+                }
 
-        const [rowsUP, fieldsUP] = await connection.execute(
-            `SELECT mensagens FROM chamados WHERE id = ${data["id"]}` 
-        )
-
-        res.status(202).json({
-            success: true,
-            msgData: rowsUP,
-            message: "Usuário logado"
-        })
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
+                res.status(202).json({
+                    success: true,
+                    content: result
+                })
+            })
+    })
 }
 
 export const deleteOne = async (req, res) => {
-    try{
-        const [rows, fields] = await connection.execute(
-            `DELETE FROM chamados WHERE chamados.id = ${req.params.id}`
-        )
-        
-        res.status(202).json({
-            success: true,
-            message: "Chamado removido com sucesso"
-        })
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
+    
+    pool.getConnection((err, connection) => {
+        if(err) {
+            res.status(500).json({
+                success: false,
+                message: err
+            })
+        }
+
+        connection.query( `DELETE FROM chamados WHERE chamados.id = ${req.params.id}`, (err, result) => {
+                connection.release();
+                if (err) {
+                    res.status(500).json({
+                        success: false,
+                        message: err
+                    })
+                    return;
+                }
+
+                res.status(202).json({
+                    success: true,
+                    content: result
+                })
+            })
+    })
 }

@@ -1,54 +1,71 @@
-import mysql from "mysql2/promise"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs"
 
-import DBCfg from "../config/db.js"
+// import DBCfg from "../config/db.js"
 
-const connection = await mysql.createConnection(DBCfg)
+// const connection = await mysql.createConnection(DBCfg)
+import pool from "../api/DatabaseConnector.js"
 
 export const list = async (req, res) => {
-    try {
-        const [rows, fields] = await connection.execute(
-            `SELECT id, user, name, email, permission, section FROM users` 
-        )
+    pool.getConnection((err, connection) => {
+        if (err) {
+            res.status(500).json({
+                success: true,
+                message: err,
+            });
+            return;
+        }
         
-        res.status(202).json({
-            success: true,
-            content: rows
+        connection.query(`SELECT id, user, name, email, permission, section FROM users`, (err, results) => {
+            connection.release()
+            if (err) {
+                res.status(500).json({
+                    success: false,
+                    message: err,
+                });
+                return;
+            }
+
+            res.status(202).json({
+                success: true,
+                content: results
+            })
+            return;
         })
-    } catch (error) {
-        res.status(500).json({
-            success: true,
-            message: error,
-        });
-    }
+    }) 
 }
 
 export const search = async (req, res) => {
-    try {
-        const [rows, fields] = await connection.execute(
-            `SELECT * FROM users WHERE id = ${req.params.id}` 
-        )
-        
-        res.status(202).json({
-            success: true,
-            content: rows
+    pool.getConnection((err, connection) => {
+        if (err) {
+            res.status(500).json({
+                success: true,
+                message: err,
+            });
+        }
+        connection.query(`SELECT * FROM users WHERE id = ${req.params.id}`, (err, results) => {
+            connection.release()
+            res.status(202).json({
+                success: true,
+                content: results
+            })
         })
-    } catch (error) {
-        res.status(500).json({
-            success: true,
-            message: error,
-        });
-    }
+    })
 }
 
 export const register = async (req, res) => {
     const data = req.body
     
-    try {
+    pool.getConnection(async (err, connection) => {
+        if (err) {
+            console.log(err)
+            res.status(500).json({
+                success: false,
+                message: err,
+            });
+        }
         const password = await bcrypt.hash(data.password, 10)
-
-        const [rows, fields] = await connection.execute(
+        connection.query(
             `INSERT INTO users (
                 user,
                 password,
@@ -56,137 +73,195 @@ export const register = async (req, res) => {
                 email,
                 permission,
                 section
-            ) VALUES ( '${data.user}', '${password}', '${data.name}', '${data.email}', '${data.permission}', '${data.setor}' )` 
-        )
-        res.status(202).json({
-            success: true,
-            message: "Usuário registrado"
-        })
+            ) VALUES ( '${data.user}', '${password}', '${data.name}', '${data.email}', '${data.permission}', '${data.setor}' )`,
+            (err, result) =>{
+                connection.release()
+                if (err) {
+                    res.status(400).json({
+                        success: false,
+                        message: "Usuário não registrado"
+                    })
+                    return;
+                }
 
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
+                res.status(202).json({
+                    success: true,
+                    message: "Usuário não registrado",
+                    content: result
+                })
+            }
+        )
+    })
+        
 }
 
 export const update = async (req, res) => {
     const data = req.body
 
-    try {
-        const [rows, fields] = await connection.execute(
+    pool.getConnection((err, connection) => {
+        if (err) {
+            res.status(500).json({
+                success: false,
+                message: err,
+            });
+        }
+        connection.query(
             `UPDATE users SET 
                 user = '${data["user"]}',
                 name = '${data["name"]}',
                 email = '${data["email"]}',
                 permission = '${data["permission"]}',
                 section = '${data["setor"]}'
-            WHERE id = ${req.params.id}`
+            WHERE id = ${req.params.id}`,
+            (err, result) => {
+                connection.release()
+                if (err) {
+                    res.status(500).json({
+                        success: false,
+                        message: err,
+                    });
+                }
+                res.status(202).json({
+                    success: true,
+                    message: "Registro criado"
+                })
+            }
         )
-        res.status(202).json({
-            success: true,
-            message: "Registro criado"
-        })
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
+    })
 }
 
 export const novaSenha = async (req, res) => {
     const data = req.body
 
-    try {
-        const [rows, fields] = await connection.execute(
+    pool.getConnection((err, connection) => {
+        if (err) {
+            res.status(500).json({
+                success: false,
+                message: err,
+            });
+        }
+        connection.query(
             `UPDATE users SET password = '${data["senha"]}'
-            WHERE id = ${data["id"]}`
+            WHERE id = ${data["id"]}`,
+            (err, result) => {
+                connection.release();
+                if (err) {
+                    res.status(500).json({
+                        success: false,
+                        message: err,
+                    });
+                }
+
+                res.status(202).json({
+                    success: true,
+                    message: "Registro alterado"
+                })
+            }
         )
-        res.status(202).json({
-            success: true,
-            message: "Registro alterado"
-        })
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
+    })
 }
 
 export const verify = async (req, res) => {
     const data = req.body
-    try {
-        const [rows, fields] = await connection.execute(
-            `SELECT * FROM users WHERE user = '${data["user"]}' LIMIT 1` 
-        )
-        const passwordBD = rows[0]['password']
-        const passwordLogin = data.password
-
-        const isPasswordValid = await bcrypt.compare(passwordLogin, passwordBD)
-        if (!isPasswordValid) {
-            return res.status(400).json({
+    
+    pool.getConnection((err, connection) => {
+        if (err) {
+            console.log(err)
+            res.status(500).json({
                 success: false,
-                message: "Credencial não encontrada",
+                message: err,
             });
+            return;
         }
 
-        const token = jwt.sign({name: rows[0]["name"], permissao: rows[0]["permission"],}, 'bananadoce', { expiresIn: '1h' })
-        return res.status(200).json({
-            success: true,
-            message: "Usuário logado",
-            nome: rows[0]["name"],
-            permissao: rows[0]["permission"],
-            token
-        })
+        connection.query(`SELECT * FROM users WHERE user = '${data["user"]}' LIMIT 1`, async (err, results) => {
+            connection.release();
+            if (err) {
+                console.log(err)
+                res.status(500).json({
+                    success: false,
+                    message: err,
+                });
+                return;
+            }
 
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
+            const passwordBD = results[0]['password']
+            const passwordLogin = data.password
+
+            const isPasswordValid = await bcrypt.compare(passwordLogin, passwordBD)
+            
+            if (!isPasswordValid) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Credencial não encontrada",
+                });
+            }
+
+            const token = jwt.sign({name: results[0]["name"], permissao: results[0]["permission"],}, 'bananadoce', { expiresIn: '1h' })
+            return res.status(200).json({
+                success: true,
+                message: "Usuário logado",
+                nome: results[0]["name"],
+                permissao: results[0]["permission"],
+                token
+            })
+        })
+    })
 }
 
 export const deleteOne = async (req, res) => {
     const data = req.body
-    try {
-        const [rows, fields] = await connection.execute(
-            `DELETE FROM users WHERE id = ${req.params.id}` 
-        )
-
-        return res.status(200).json({
-            success: true,
-            message: "Usuário logado"
+    
+    pool.getConnection((err, connection) => {
+        if (err) {
+            res.status(500).json({
+                success: false,
+                message: err,
+            });
+            return;
+        }
+        connection.query(`DELETE FROM users WHERE id = ${req.params.id}`, (err, result) => {
+            connection.release();
+            if (err) {
+                res.status(500).json({
+                    success: false,
+                    message: err,
+                });
+                return;
+            }
+            res.status(200).json({
+                success: true,
+                message: "Usuário logado"
+            })
         })
-
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            success: false,
-            message: error,
-        });
-    }
+    })
 }
 
 export const getTecnicos = async (req, res) => {
+    pool.getConnection((err, connection) => {
+        if(err) {
+            res.status(500).json({
+                success: true,
+                message: err,
+            });
+            return;
+        }
 
-    try {
-        const [rows, fields] = await connection.execute(
-            `SELECT name FROM users WHERE permission = 'Técnico'`
-        )
-        res.status(202).json({
-            success: true,
-            content: rows
+        connection.query(`SELECT name FROM users WHERE permission = 'Técnico'`, (err, result) => {
+            connection.release();
+            if(err) {
+                res.status(500).json({
+                    success: true,
+                    message: err,
+                });
+                return;
+            }
+            
+            res.status(202).json({
+                success: true,
+                content: result
+            })
+            return;
         })
-    } catch (error) {
-        res.status(500).json({
-            success: true,
-            message: error,
-        });
-    }
+    })
 }

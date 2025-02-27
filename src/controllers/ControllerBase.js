@@ -1,4 +1,4 @@
-import mysql from "mysql2/promise"
+import mysql from "mysql2"
 
 import DBCfg from "../config/db.js"
 

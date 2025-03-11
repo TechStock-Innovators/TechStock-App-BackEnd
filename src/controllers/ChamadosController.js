@@ -11,6 +11,7 @@ export const list = async (req, res) => {
                 success: true,
                 message: err,
             });
+            return;
         }
 
         connection.query(`SELECT * FROM chamados WHERE status <> 'Solucionado'`, (err, result) => {
@@ -21,12 +22,14 @@ export const list = async (req, res) => {
                     success: true,
                     message: err,
                 });
+                return;
             }
 
             res.status(202).json({
                 success: true,
                 content: result
             })
+            return;
         })
     })
 }
@@ -38,6 +41,7 @@ export const search = async (req, res) => {
                 success: true,
                 message: err,
             });
+            return;
         }
 
         connection.query( `SELECT * FROM chamados WHERE id = ${req.params.id}`, (err, result) => {
@@ -48,12 +52,14 @@ export const search = async (req, res) => {
                     success: true,
                     message: err,
                 });
+                return;
             }
 
             res.status(202).json({
                 success: true,
                 content: result
             })
+            return;
         })
     })
 }
@@ -67,12 +73,13 @@ export const add = async (req, res) => {
                 success: false,
                 message: err
             })
+            return;
         }
 
         connection.query(`INSERT INTO chamados
-            (patrimonio, descricao, responsavel, setor, created_at, created_by) 
+            (patrimonio, descricao, responsavel, setor, mensagens, created_at, created_by) 
             VALUES 
-            (${data['patrimonio']}, '${data['descricao']}', '${data['responsavel']}', '${data['setor']}', 
+            (${data['patrimonio']}, '${data['descricao']}', '${data['responsavel']}', '${data['setor']}', '${data['messagesID']}',
             current_timestamp(), 'SEM NOME')`, (err, result) => {
                 connection.release();
                 if (err) {
@@ -87,6 +94,7 @@ export const add = async (req, res) => {
                     success: true,
                     content: result
                 })
+                return;
             })
     })
 }
@@ -100,6 +108,7 @@ export const update = async (req, res) => {
                 success: false,
                 message: err
             })
+            return;
         }
 
         connection.query(`UPDATE chamados 
@@ -128,6 +137,7 @@ export const update = async (req, res) => {
                     success: true,
                     content: result
                 })
+                return;
             })
     })
 }
@@ -141,6 +151,7 @@ export const msgUpdate = async (req, res) => {
                 success: false,
                 message: err
             })
+            return;
         }
 
         connection.query(`UPDATE chamados 
@@ -161,6 +172,7 @@ export const msgUpdate = async (req, res) => {
                     success: true,
                     content: result
                 })
+                return;
             })
     })
 }
@@ -173,6 +185,7 @@ export const deleteOne = async (req, res) => {
                 success: false,
                 message: err
             })
+            return;
         }
 
         connection.query( `DELETE FROM chamados WHERE chamados.id = ${req.params.id}`, (err, result) => {
@@ -189,6 +202,7 @@ export const deleteOne = async (req, res) => {
                     success: true,
                     content: result
                 })
+                return;
             })
     })
 }

@@ -12,6 +12,7 @@ export const list = async (req, res) => {
                 success: false,
                 message: err
             })
+            return;
         }
 
         connection.query(`SELECT * FROM inventario`, (err, result) => {
@@ -28,6 +29,7 @@ export const list = async (req, res) => {
                     success: true,
                     content: result
                 })
+                return;
             })
     })
 }
@@ -40,6 +42,7 @@ export const search = async (req, res) => {
                 success: false,
                 message: err
             })
+            return;
         }
 
         connection.query(`SELECT * FROM inventario WHERE id = ${req.params.id}`, (err, result) => {
@@ -56,6 +59,7 @@ export const search = async (req, res) => {
                     success: true,
                     content: result
                 })
+                return;
             })
     })
 }
@@ -68,6 +72,7 @@ export const getChamados = async (req, res) => {
                 success: false,
                 message: err
             })
+            return;
         }
 
         connection.query(`SELECT id, descricao, created_at FROM chamados WHERE patrimonio = ${req.params.patrimonio}`, (err, result) => {
@@ -84,6 +89,7 @@ export const getChamados = async (req, res) => {
                     success: true,
                     content: result
                 })
+                return;
             })
     })
 }
@@ -97,6 +103,7 @@ export const add = async (req, res) => {
                 success: false,
                 message: err
             })
+            return;
         }
 
         connection.query(
@@ -119,6 +126,7 @@ export const add = async (req, res) => {
                     success: true,
                     content: result
                 })
+                return;
             })
     })
 }
@@ -133,6 +141,7 @@ export const update = async (req, res) => {
                 success: false,
                 message: err
             })
+            return;
         }
 
         connection.query(
@@ -167,6 +176,7 @@ export const update = async (req, res) => {
                     success: true,
                     content: result
                 })
+                return;
             })
     })
 }
@@ -179,23 +189,25 @@ export const deleteOne = async (req, res) => {
                 success: false,
                 message: err
             })
+            return;
         }
 
         connection.query(`DELETE FROM inventario WHERE id = ${req.params.id}`, (err, result) => {
-                connection.release();
-                if (err) {
-                    res.status(500).json({
-                        success: false,
-                        message: err
-                    })
-                    return;
-                }
-
-                res.status(202).json({
-                    success: true,
-                    content: result
+            connection.release();
+            if (err) {
+                res.status(500).json({
+                    success: false,
+                    message: err
                 })
+                return;
+            }
+
+            res.status(202).json({
+                success: true,
+                content: result
             })
+            return;
+        })
     })
 }
 

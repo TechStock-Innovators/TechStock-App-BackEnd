@@ -42,6 +42,7 @@ export const search = async (req, res) => {
                 success: true,
                 message: err,
             });
+            return;
         }
         connection.query(`SELECT * FROM users WHERE id = ${req.params.id}`, (err, results) => {
             connection.release()
@@ -49,6 +50,7 @@ export const search = async (req, res) => {
                 success: true,
                 content: results
             })
+            return;
         })
     })
 }
@@ -58,11 +60,11 @@ export const register = async (req, res) => {
     
     pool.getConnection(async (err, connection) => {
         if (err) {
-            console.log(err)
             res.status(500).json({
                 success: false,
                 message: err,
             });
+            return;
         }
         const password = await bcrypt.hash(data.password, 10)
         connection.query(
@@ -79,7 +81,7 @@ export const register = async (req, res) => {
                 if (err) {
                     res.status(400).json({
                         success: false,
-                        message: "Usuário não registrado"
+                        message: err
                     })
                     return;
                 }
@@ -89,6 +91,7 @@ export const register = async (req, res) => {
                     message: "Usuário não registrado",
                     content: result
                 })
+                return;
             }
         )
     })
@@ -104,6 +107,7 @@ export const update = async (req, res) => {
                 success: false,
                 message: err,
             });
+            return;
         }
         connection.query(
             `UPDATE users SET 
@@ -120,11 +124,13 @@ export const update = async (req, res) => {
                         success: false,
                         message: err,
                     });
+                    return;
                 }
                 res.status(202).json({
                     success: true,
                     message: "Registro criado"
                 })
+                return;
             }
         )
     })
@@ -139,6 +145,7 @@ export const novaSenha = async (req, res) => {
                 success: false,
                 message: err,
             });
+            return;
         }
         connection.query(
             `UPDATE users SET password = '${data["senha"]}'
@@ -150,12 +157,14 @@ export const novaSenha = async (req, res) => {
                         success: false,
                         message: err,
                     });
+                    return;
                 }
 
                 res.status(202).json({
                     success: true,
                     message: "Registro alterado"
                 })
+                return;
             }
         )
     })
@@ -233,6 +242,7 @@ export const deleteOne = async (req, res) => {
                 success: true,
                 message: "Usuário logado"
             })
+            return;
         })
     })
 }

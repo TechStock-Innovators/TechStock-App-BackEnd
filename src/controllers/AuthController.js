@@ -193,7 +193,15 @@ export const verify = async (req, res) => {
                 });
                 return;
             }
+            console.log(results)
 
+            if (results.length == 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Credencial não encontrada",
+                });
+            }
+            
             const passwordBD = results[0]['password']
             const passwordLogin = data.password
 

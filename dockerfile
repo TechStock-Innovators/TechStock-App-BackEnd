@@ -1,4 +1,4 @@
-FROM node:23-alpine3.20 AS TechStockAPI
+FROM node:23-alpine3.20 AS techstockapi
 
 WORKDIR /home/node/app
 

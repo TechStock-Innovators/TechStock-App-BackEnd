@@ -7,6 +7,7 @@ import inventarioRoutes from "./src/routes/Inventario.js"
 import dashboardRoutes from "./src/routes/Dashboard.js"
 
 import { authMiddleware } from './src/middleware/AuthMiddleware.js'
+import artigoRoutes from './src/routes/Artigos.js'
 
 const app = express()
 const PORT = 4000
@@ -24,6 +25,7 @@ app.use("/user", authRoutes)
 app.use("/chamados", authMiddleware, chamadosRoutes)
 app.use("/inventario", inventarioRoutes)
 app.use("/dashboard", dashboardRoutes)
+app.use("/artigos", artigoRoutes)
 
 app.get('/', (req, res) => {
     res.send("Starter")

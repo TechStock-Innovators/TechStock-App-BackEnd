@@ -92,7 +92,7 @@ export const add = async (req, res) => {
 
                 res.status(202).json({
                     success: true,
-                    content: result
+                    content: result.insertId
                 })
                 return;
             })
@@ -119,6 +119,7 @@ export const update = async (req, res) => {
                 tags = '${data["tags"]}',
                 status = '${data["status"]}',
                 linksBase = NULL,
+                solucao = '${data["solucao"]}',
                 edited_at = current_timestamp(),
                 edited_by = 'SEM NOME AINDA'
             WHERE 

@@ -9,6 +9,8 @@ import dashboardRoutes from "./src/routes/Dashboard.js"
 import { authMiddleware } from './src/middleware/AuthMiddleware.js'
 import artigoRoutes from './src/routes/Artigos.js'
 
+// import "./src/config/cache.js"
+
 const app = express()
 const PORT = 4000
 

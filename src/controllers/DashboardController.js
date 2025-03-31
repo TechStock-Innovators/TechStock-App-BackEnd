@@ -8,38 +8,105 @@ export const quantidadeChamados = async (req, res) => {
     
 }
 
-// export const ultimasMensagens = async (req, res) => {
-//     pool.getConnection((err, connection) => {
-//         if(err) {
-//             res.status(500).json({
-//                 success: false,
-//                 message: err
-//             })
-//             return;
-//         }
+export const index = async (req, res) => {
+    pool.getConnection(async (err, connection) => {
+        
+        const getTicketsAnteriores = () => { 
+            return new Promise((resolve, reject) => {
+                connection.query(`SELECT status, COUNT(status) AS qnt
+                                        FROM techstockapp.chamados
+                                        WHERE WEEK(created_at) = WEEK(now()) - 1
+                                        GROUP BY status`,
+                            (err, result) => {
+                                if(err) {
+                                    reject(err);
+                                }
+                                let TicketsAnteriores = {}
+                                result.forEach((element, key) => {
+                                    if (element.status=="Em pausa") {
+                                        element.status = "EmPausa"
+                                    }
+                                    if (element.status=="Em atendimento") {
+                                        element.status = "EmAtendimento"
+                                    }
+                                    TicketsAnteriores[element.status] = element.qnt
+                                });
+                                resolve(TicketsAnteriores)
+                            })
+        })}
 
-//         connection.query(`SELECT id, mensagens FROM chamados ORDER BY edited_at DESC LIMIT 10`, (err, result) => {
-//             connection.release();
-//             if (err) {
-//                 res.status(500).json({
-//                     success: false,
-//                     message: err
-//                 })
-//                 return;
-//             }
-//             const temp = result.map(element => {
-//                 const mensagens = JSON.parse(element.mensagens)
-//                 return {
-//                     id: element.id, 
-//                     mensagem: mensagens
-//                 }
-//             });
-//             const lista = temp.filter((item)=>{ return item.mensagem != undefined })
-//             res.status(202).json({
-//                 success: true,
-//                 content: lista
-//             })
-//             return;
-//         })
-//     })
-// }
+        const getTicketsAtuais = () => { 
+            return new Promise((resolve, reject) => {
+                connection.query(`SELECT status, COUNT(status) AS qnt
+                                    FROM techstockapp.chamados
+                                    WHERE WEEK(created_at) = WEEK(now())
+                                    GROUP BY status`,
+                            (err, result) => {
+                                if(err) {
+                                    reject(err)
+                                }
+                                resolve(result)
+                            })
+        })}
+
+        const geticketsPorCategoria = () => {
+            return new Promise((resolve, reject) => {
+            connection.query(`SELECT tags, COUNT(tags) AS qnt FROM techstockapp.chamados
+                                WHERE MONTH(created_at) = MONTH(now()) AND tags IS NOT NULL
+                                GROUP BY tags;`,
+                        (err, result) => {
+                            if(err) {
+                                reject(err)
+                            }
+                            resolve(result)
+                        })
+        })}
+
+        const getTicketsMaisRecentes = () => {
+            return new Promise((resolve, reject) => {
+            connection.query(`SELECT  * FROM techstockapp.chamados WHERE status <> 'Solucionado' ORDER BY created_at DESC LIMIT 10;`,
+                        (err, result) => {
+                            if(err) {
+                                reject(err)
+                            }
+                            resolve(result)
+                        })
+        })}
+
+
+        if(err) {
+            res.status(500).json({
+                success: false,
+                message: err
+            })
+            return;
+        }
+        
+        const [ticketsAnteriores, ticketsAtuais, ticketsPorCategoria, ticketsMaisRecentes] = await Promise.all([
+            getTicketsAnteriores(),
+            getTicketsAtuais(),
+            geticketsPorCategoria(),
+            getTicketsMaisRecentes()
+        ])
+
+        connection.release();
+
+        // console.log(
+        //     ticketsAnteriores, 
+        //     ticketsAtuais, 
+        //     ticketsPorCategoria, 
+        //     ticketsMaisRecentes
+        // )
+
+        res.status(202).json({
+            success: true,
+            content: {
+                ticketsAnteriores, 
+                ticketsAtuais, 
+                ticketsPorCategoria, 
+                ticketsMaisRecentes
+            }
+        })
+        return;
+    })
+}

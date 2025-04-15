@@ -110,13 +110,14 @@ export const update = async (req, res) => {
             })
             return;
         }
+        console.log(JSON.parse(data["tags"]).value)
         
         connection.query(`UPDATE chamados 
             SET 
                 responsavel = '${data["responsavel"]}',
                 setor = '${data["setor"]}',
                 tecnico = '${data["tecnico"]}',
-                tags = '${JSON.parse(data["tags"])[0].value}',
+                tags = '${JSON.parse(data["tags"]).value}',
                 status = '${data["status"]}',
                 linksBase = NULL,
                 solucao = '${data["solucao"]}',

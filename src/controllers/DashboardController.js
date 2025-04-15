@@ -45,7 +45,17 @@ export const index = async (req, res) => {
                                 if(err) {
                                     reject(err)
                                 }
-                                resolve(result)
+                                let TicketsAtuais = {}
+                                result.forEach((element, key) => {
+                                    if (element.status=="Em pausa") {
+                                        element.status = "EmPausa"
+                                    }
+                                    if (element.status=="Em atendimento") {
+                                        element.status = "EmAtendimento"
+                                    }
+                                    TicketsAtuais[element.status] = element.qnt
+                                });
+                                resolve(TicketsAtuais)
                             })
         })}
 
@@ -72,6 +82,26 @@ export const index = async (req, res) => {
                             resolve(result)
                         })
         })}
+        
+        const getTicketsAbertosvsResolvidos = () => {
+            return new Promise((resolve, reject) => {
+            connection.query(`SELECT CASE
+                                WHEN status = 'Solucionado' THEN 'Solucionado'
+                                ELSE 'naoSolucionado'
+                                END as STATUS,
+                                COUNT(id) AS qnt,
+                                WEEKDAY(created_at)
+                                FROM chamados
+                                WHERE WEEK(created_at) = WEEK(now())
+                                GROUP BY WEEKDAY(created_at), STATUS
+                                ORDER BY WEEKDAY(created_at)`,
+                        (err, result) => {
+                            if(err) {
+                                reject(err)
+                            }
+                            resolve(result)
+                        })
+        })}
 
 
         if(err) {
@@ -82,11 +112,12 @@ export const index = async (req, res) => {
             return;
         }
         
-        const [ticketsAnteriores, ticketsAtuais, ticketsPorCategoria, ticketsMaisRecentes] = await Promise.all([
+        const [ticketsAnteriores, ticketsAtuais, ticketsPorCategoria, ticketsMaisRecentes, ticketsAbertosvsResolvidos] = await Promise.all([
             getTicketsAnteriores(),
             getTicketsAtuais(),
             geticketsPorCategoria(),
-            getTicketsMaisRecentes()
+            getTicketsMaisRecentes(),
+            getTicketsAbertosvsResolvidos()
         ])
 
         connection.release();
@@ -104,7 +135,8 @@ export const index = async (req, res) => {
                 ticketsAnteriores, 
                 ticketsAtuais, 
                 ticketsPorCategoria, 
-                ticketsMaisRecentes
+                ticketsMaisRecentes,
+                ticketsAbertosvsResolvidos
             }
         })
         return;

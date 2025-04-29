@@ -14,7 +14,7 @@ export const index = async (req, res) => {
         const getTicketsAnteriores = () => { 
             return new Promise((resolve, reject) => {
                 connection.query(`SELECT status, COUNT(status) AS qnt
-                                        FROM techstockapp.chamados
+                                        FROM chamados
                                         WHERE WEEK(created_at) = WEEK(now()) - 1
                                         GROUP BY status`,
                             (err, result) => {
@@ -38,7 +38,7 @@ export const index = async (req, res) => {
         const getTicketsAtuais = () => { 
             return new Promise((resolve, reject) => {
                 connection.query(`SELECT status, COUNT(status) AS qnt
-                                    FROM techstockapp.chamados
+                                    FROM chamados
                                     WHERE WEEK(created_at) = WEEK(now())
                                     GROUP BY status`,
                             (err, result) => {
@@ -61,7 +61,7 @@ export const index = async (req, res) => {
 
         const geticketsPorCategoria = () => {
             return new Promise((resolve, reject) => {
-            connection.query(`SELECT tags, COUNT(tags) AS qnt FROM techstockapp.chamados
+            connection.query(`SELECT tags, COUNT(tags) AS qnt FROM chamados
                                 WHERE MONTH(created_at) = MONTH(now()) AND tags IS NOT NULL
                                 GROUP BY tags;`,
                         (err, result) => {
@@ -74,7 +74,7 @@ export const index = async (req, res) => {
 
         const getTicketsMaisRecentes = () => {
             return new Promise((resolve, reject) => {
-            connection.query(`SELECT  * FROM techstockapp.chamados WHERE status <> 'Solucionado' ORDER BY created_at DESC LIMIT 10;`,
+            connection.query(`SELECT  * FROM chamados WHERE status <> 'Solucionado' ORDER BY created_at DESC LIMIT 10;`,
                         (err, result) => {
                             if(err) {
                                 reject(err)

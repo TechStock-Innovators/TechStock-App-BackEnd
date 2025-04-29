@@ -2,6 +2,7 @@
 
 const DBCfg = {
     host: "localhost",
+    // host: "20.206.248.175",
     port: 3306,
     user: "internet",
     password: "!@#ASD123asd",

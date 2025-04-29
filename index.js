@@ -8,6 +8,7 @@ import dashboardRoutes from "./src/routes/Dashboard.js"
 
 import { authMiddleware } from './src/middleware/AuthMiddleware.js'
 import artigoRoutes from './src/routes/Artigos.js'
+import IARoutes from './src/routes/IA.js'
 
 // import "./src/config/cache.js"
 
@@ -28,6 +29,7 @@ app.use("/chamados", authMiddleware, chamadosRoutes)
 app.use("/inventario", inventarioRoutes)
 app.use("/dashboard", dashboardRoutes)
 app.use("/artigos", artigoRoutes)
+app.use("/api", IARoutes)
 
 app.get('/', (req, res) => {
     res.send("Starter")

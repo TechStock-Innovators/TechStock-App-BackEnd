@@ -6,7 +6,7 @@ import pool from "../api/DatabaseConnector.js";
 export const getClassificacao = async (req, res) => {
     const data = req.body
 
-    // const url = '20.206.248.175'
+    // const url = 'http://20.206.248.175:5000/'
     const url = 'http://localhost:5000/'
     let incomingInfo = await fetch(url + 'indentificar', {
         method: "POST",

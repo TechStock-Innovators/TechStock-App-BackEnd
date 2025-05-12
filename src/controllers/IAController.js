@@ -19,7 +19,7 @@ export const getClassificacao = async (req, res) => {
         return response.json()
     })
     .then((data) => {
-        return data["resposta"]
+        return data["resposta"].toLowerCase().replace("\n", "")
     })
 
     return res.status(200).json({
